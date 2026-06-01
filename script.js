@@ -1,7 +1,167 @@
 /**
- * Archive.org Direct Link Extractor
+ * Archievty
  * Extracts direct download links from Archive.org
  */
+
+const translations = {
+    id: {
+        "logo-text": "Archievty",
+        "subtitle": "Dapatkan link download langsung dari Archive.org",
+        "card-title": "Ekstrak Link Download",
+        "card-description": "Masukkan URL Archive.org untuk mendapatkan link download langsung",
+        "label-url": "URL Archive.org",
+        "input-placeholder": "https://archive.org/details/contoh-item",
+        "btn-extract": "Ekstrak",
+        "btn-extracting": "Mengekstrak...",
+        "btn-extract-idle": "Ekstrak Link Download",
+        "usage-title": "Cara Penggunaan",
+        "usage-step-1": "Tempel URL Archive.org",
+        "usage-step-2": "Klik \"Ekstrak\"",
+        "usage-step-3": "Dapatkan URL download langsung",
+        "usage-example": "Contoh URL:",
+        "history-title": "Riwayat Ekstraksi",
+        "empty-title": "Belum ada ekstraksi",
+        "empty-description": "Masukkan URL Archive.org dan klik ekstrak untuk melihat hasilnya di sini",
+        "loader-text": "Mengekstrak link download...",
+        "error-title": "Ekstraksi Gagal",
+        "error-message": "Tidak dapat mengekstrak link download.",
+        "btn-retry": "Coba Lagi",
+        "dl-title": "Link Download Langsung",
+        "dl-btn": "Unduh",
+        "details-title": "Detail File",
+        "hashes-title": "Hash Keamanan",
+        "all-files-title": "Semua File",
+        "json-title": "Respons API (JSON)",
+        "btn-copy-json": "Salin JSON",
+        "footer-text": "Dibuat dengan <span class=\"heart\">♥</span> oleh Bisma.",
+        "toast-copied-link": "Link download berhasil disalin!",
+        "toast-copied-json": "Respons JSON berhasil disalin!",
+        "toast-deleted-history": "Riwayat dihapus",
+        "toast-no-files": "Tidak ada file yang dapat diunduh",
+        "toast-export-success": "Berhasil mengekspor daftar link to TXT!",
+        "toast-invalid-url": "URL Archive.org tidak valid",
+        "toast-not-found": "Item tidak ditemukan di Archive.org",
+        "toast-failed-fetch": "Gagal mengambil data",
+        "toast-timeout": "Koneksi timeout. Server Archive.org lambat merespons.",
+        "toast-error-generic": "Terjadi kesalahan. Silakan coba lagi.",
+        "files-actions-label": "Ekspor daftar link untuk IDM/JDownloader:",
+        "export-txt-btn": "Ekspor TXT",
+        "detail-filename": "Nama File",
+        "detail-itemid": "ID Item",
+        "detail-filesize": "Ukuran File",
+        "detail-filetype": "Tipe File",
+        "detail-uploaddate": "Tanggal Unggah",
+        "detail-uploader": "Pengunggah",
+        "detail-collection": "Koleksi",
+        "detail-cachedat": "Di-cache Pada",
+        "dl-btn-file": "Unduh",
+        "title-theme": "Ubah Tema",
+        "title-copy-link": "Salin Link",
+        "title-copy-hash": "Salin Hash",
+        "title-delete-history": "Hapus Riwayat",
+        "title-clear": "Hapus"
+    },
+    en: {
+        "logo-text": "Archievty",
+        "subtitle": "Get direct download links from Archive.org",
+        "card-title": "Extract Download Links",
+        "card-description": "Enter Archive.org URL to get direct download links",
+        "label-url": "Archive.org URL",
+        "input-placeholder": "https://archive.org/details/example-item",
+        "btn-extract": "Extract",
+        "btn-extracting": "Extracting...",
+        "btn-extract-idle": "Extract Download Links",
+        "usage-title": "How to Use",
+        "usage-step-1": "Paste Archive.org URL",
+        "usage-step-2": "Click \"Extract\"",
+        "usage-step-3": "Get direct download URL",
+        "usage-example": "Example URL:",
+        "history-title": "Extraction History",
+        "empty-title": "No extraction yet",
+        "empty-description": "Enter Archive.org URL and click extract to see results here",
+        "loader-text": "Extracting download links...",
+        "error-title": "Extraction Failed",
+        "error-message": "Unable to extract download links.",
+        "btn-retry": "Retry",
+        "dl-title": "Direct Download Link",
+        "dl-btn": "Download",
+        "details-title": "File Details",
+        "hashes-title": "Security Hashes",
+        "all-files-title": "All Files",
+        "json-title": "API Response (JSON)",
+        "btn-copy-json": "Copy JSON",
+        "footer-text": "Made with <span class=\"heart\">♥</span> by Bisma.",
+        "toast-copied-link": "Download link successfully copied!",
+        "toast-copied-json": "API response successfully copied!",
+        "toast-deleted-history": "History deleted",
+        "toast-no-files": "No downloadable files found",
+        "toast-export-success": "Successfully exported download links to TXT!",
+        "toast-invalid-url": "Invalid Archive.org URL",
+        "toast-not-found": "Item not found on Archive.org",
+        "toast-failed-fetch": "Failed to fetch data",
+        "toast-timeout": "Connection timeout. Archive.org server is slow to respond.",
+        "toast-error-generic": "An error occurred. Please try again.",
+        "files-actions-label": "Export link list for IDM/JDownloader:",
+        "export-txt-btn": "Export TXT",
+        "detail-filename": "File Name",
+        "detail-itemid": "Item ID",
+        "detail-filesize": "File Size",
+        "detail-filetype": "File Type",
+        "detail-uploaddate": "Upload Date",
+        "detail-uploader": "Uploader",
+        "detail-collection": "Collection",
+        "detail-cachedat": "Cached At",
+        "dl-btn-file": "Download",
+        "title-theme": "Change Theme",
+        "title-copy-link": "Copy Link",
+        "title-copy-hash": "Copy Hash",
+        "title-delete-history": "Delete History",
+        "title-clear": "Clear"
+    }
+};
+
+let currentLang = localStorage.getItem('lang') || 'id';
+
+function setLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem('lang', lang);
+    document.documentElement.setAttribute('lang', lang);
+    
+    // Update active class on buttons
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === lang);
+    });
+    
+    // Translate all elements with data-i18n
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang][key]) {
+            if (el.tagName === 'INPUT') {
+                el.placeholder = translations[lang][key];
+            } else if (key === 'footer-text') {
+                el.innerHTML = translations[lang][key];
+            } else {
+                el.textContent = translations[lang][key];
+            }
+        }
+    });
+
+    // Translate elements with data-i18n-title
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+        const key = el.getAttribute('data-i18n-title');
+        if (translations[lang][key]) {
+            el.title = translations[lang][key];
+        }
+    });
+
+    // Refresh history card UI to reflect translations
+    loadHistory();
+    
+    // Refresh result card if present
+    if (currentData) {
+        populateResult(currentData);
+    }
+}
 
 // DOM Elements - Input Section
 const urlInput = document.getElementById('urlInput');
@@ -79,11 +239,20 @@ function showToast(message) {
  * Loads recent searches from localStorage
  */
 function loadHistory() {
-    const history = JSON.parse(localStorage.getItem('extractHistory') || '[]');
+    let history = [];
+    try {
+        history = JSON.parse(localStorage.getItem('extractHistory') || '[]');
+    } catch (e) {
+        console.error('Error parsing history:', e);
+        history = [];
+    }
+
     if (history.length === 0) {
         historyCard.classList.add('hidden');
         return;
     }
+
+    const deleteTitle = translations[currentLang]['title-delete-history'] || 'Hapus Riwayat';
 
     historyCard.classList.remove('hidden');
     historyList.innerHTML = history.map(item => `
@@ -92,7 +261,7 @@ function loadHistory() {
                 <span class="history-item-title">${item.title}</span>
                 <span class="history-item-id">${item.itemId}</span>
             </div>
-            <button type="button" class="btn-delete-history" data-id="${item.itemId}" title="Hapus Riwayat">
+            <button type="button" class="btn-delete-history" data-id="${item.itemId}" title="${deleteTitle}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="3 6 5 6 21 6"></polyline>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -143,7 +312,7 @@ function deleteHistoryItem(itemId) {
     history = history.filter(item => item.itemId !== itemId);
     localStorage.setItem('extractHistory', JSON.stringify(history));
     loadHistory();
-    showToast('Riwayat dihapus');
+    showToast(translations[currentLang]['toast-deleted-history']);
 }
 
 /**
@@ -237,11 +406,11 @@ function showEmpty() {
  */
 function setButtonLoading(loading) {
     if (loading) {
-        btnText.textContent = 'Mengekstrak...';
+        btnText.textContent = translations[currentLang]['btn-extracting'] || 'Mengekstrak...';
         btnLoader.classList.remove('hidden');
         extractBtn.disabled = true;
     } else {
-        btnText.textContent = 'Ekstrak Link Download';
+        btnText.textContent = translations[currentLang]['btn-extract-idle'] || 'Ekstrak Link Download';
         btnLoader.classList.add('hidden');
         extractBtn.disabled = false;
     }
@@ -260,16 +429,14 @@ function createDetailItem(label, value) {
     `;
 }
 
-/**
- * Creates a hash item element
- */
 function createHashItem(label, value) {
     if (!value) return '';
+    const copyTitle = translations[currentLang]['title-copy-hash'] || 'Salin';
     return `
         <div class="hash-item">
             <span class="hash-label">${label}</span>
             <code class="hash-value">${value}</code>
-            <button type="button" class="btn-copy-hash" data-value="${value}" title="Salin">
+            <button type="button" class="btn-copy-hash" data-value="${value}" title="${copyTitle}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -284,6 +451,7 @@ function createHashItem(label, value) {
  * Creates a file list item
  */
 function createFileItem(file) {
+    const labels = translations[currentLang];
     return `
         <div class="file-item">
             <div class="file-item-info">
@@ -300,7 +468,7 @@ function createFileItem(file) {
                     <polyline points="7 10 12 15 17 10"></polyline>
                     <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
-                Unduh
+                ${labels['dl-btn-file']}
             </a>
         </div>
     `;
@@ -327,15 +495,37 @@ function populateResult(data) {
     downloadBtn.href = data.download_link;
 
     // Details grid
+    const labels = translations[currentLang];
+    
+    let uploadDateFormatted = '-';
+    if (data.upload_date) {
+        const date = new Date(data.upload_date);
+        const locale = currentLang === 'id' ? 'id-ID' : 'en-US';
+        uploadDateFormatted = date.toLocaleDateString(locale, {
+            year: 'numeric', month: 'short', day: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
+    }
+
+    let cachedAtFormatted = '-';
+    if (data._cached_at) {
+        const date = new Date(data._cached_at);
+        const locale = currentLang === 'id' ? 'id-ID' : 'en-US';
+        cachedAtFormatted = date.toLocaleString(locale, {
+            year: 'numeric', month: 'short', day: 'numeric',
+            hour: '2-digit', minute: '2-digit', second: '2-digit'
+        });
+    }
+
     detailsGrid.innerHTML = `
-        ${createDetailItem('Nama File', data.filename)}
-        ${createDetailItem('ID Item', data.item_id)}
-        ${createDetailItem('Ukuran File', data.file_size)}
-        ${createDetailItem('Tipe File', data.file_type)}
-        ${createDetailItem('Tanggal Unggah', data.upload_date)}
-        ${createDetailItem('Pengunggah', data.uploader)}
-        ${createDetailItem('Koleksi', Array.isArray(data.collection) ? data.collection.join(', ') : data.collection)}
-        ${createDetailItem('Di-cache Pada', data._cached_at)}
+        ${createDetailItem(labels['detail-filename'], data.filename)}
+        ${createDetailItem(labels['detail-itemid'], data.item_id)}
+        ${createDetailItem(labels['detail-filesize'], data.file_size)}
+        ${createDetailItem(labels['detail-filetype'], data.file_type)}
+        ${createDetailItem(labels['detail-uploaddate'], uploadDateFormatted)}
+        ${createDetailItem(labels['detail-uploader'], data.uploader)}
+        ${createDetailItem(labels['detail-collection'], Array.isArray(data.collection) ? data.collection.join(', ') : data.collection)}
+        ${createDetailItem(labels['detail-cachedat'], cachedAtFormatted)}
     `;
 
     // Hashes grid
@@ -392,6 +582,7 @@ function populateResult(data) {
  */
 async function extractLinks() {
     const inputUrl = urlInput.value.trim();
+    const labels = translations[currentLang];
 
     if (!inputUrl) {
         urlInput.classList.add('shake');
@@ -412,7 +603,7 @@ async function extractLinks() {
 
         if (!itemId) {
             clearTimeout(timeoutId);
-            showError('URL Archive.org tidak valid');
+            showError(labels['toast-invalid-url']);
             setButtonLoading(false);
             return;
         }
@@ -425,7 +616,7 @@ async function extractLinks() {
         clearTimeout(timeoutId);
 
         if (!response.ok) {
-            showError(`Gagal mengambil data (HTTP ${response.status})`);
+            showError(`${labels['toast-failed-fetch']} (HTTP ${response.status})`);
             setButtonLoading(false);
             return;
         }
@@ -433,7 +624,7 @@ async function extractLinks() {
         const archiveData = await response.json();
 
         if (!archiveData || !archiveData.metadata) {
-            showError('Item tidak ditemukan di Archive.org');
+            showError(labels['toast-not-found']);
             setButtonLoading(false);
             return;
         }
@@ -442,7 +633,7 @@ async function extractLinks() {
         const data = processArchiveData(archiveData, itemId);
 
         if (!data.success) {
-            showError(data.error);
+            showError(labels[data.errorKey]);
             setButtonLoading(false);
             return;
         }
@@ -454,10 +645,10 @@ async function extractLinks() {
     } catch (error) {
         clearTimeout(timeoutId);
         if (error.name === 'AbortError') {
-            showError('Koneksi timeout. Server Archive.org lambat merespons.');
+            showError(labels['toast-timeout']);
         } else {
             console.error('Error:', error);
-            showError('Terjadi kesalahan. Silakan coba lagi.');
+            showError(labels['toast-error-generic']);
         }
     }
 
@@ -485,22 +676,14 @@ function processArchiveData(archiveData, itemId) {
     const mainFile = findMainFile(files);
 
     if (!mainFile) {
-        return { success: false, error: 'Tidak ada file yang dapat diunduh' };
+        return { success: false, errorKey: 'toast-no-files' };
     }
 
     // Get all downloadable files
     const allFiles = getAllDownloadableFiles(files, itemId);
 
     // Format upload date
-    let uploadDate = null;
-    const dateStr = metadata.addeddate || metadata.publicdate;
-    if (dateStr) {
-        const date = new Date(dateStr);
-        uploadDate = date.toLocaleDateString('id-ID', {
-            year: 'numeric', month: 'short', day: 'numeric',
-            hour: '2-digit', minute: '2-digit'
-        });
-    }
+    const dateStr = metadata.addeddate || metadata.publicdate || null;
 
     return {
         success: true,
@@ -509,7 +692,7 @@ function processArchiveData(archiveData, itemId) {
         filename: mainFile.name,
         file_size: formatFileSize(mainFile.size || 0),
         file_type: getFileExtension(mainFile.name),
-        upload_date: uploadDate,
+        upload_date: dateStr,
         uploader: metadata.uploader || metadata.creator || null,
         collection: metadata.collection || null,
         security_hashes: {
@@ -605,7 +788,7 @@ async function copyDownloadUrl() {
         await navigator.clipboard.writeText(url);
         copyIcon.classList.add('hidden');
         checkIcon.classList.remove('hidden');
-        showToast('Link download berhasil disalin!');
+        showToast(translations[currentLang]['toast-copied-link']);
 
         setTimeout(() => {
             copyIcon.classList.remove('hidden');
@@ -614,7 +797,7 @@ async function copyDownloadUrl() {
     } catch (err) {
         downloadUrl.select();
         document.execCommand('copy');
-        showToast('Link download berhasil disalin!');
+        showToast(translations[currentLang]['toast-copied-link']);
     }
 }
 
@@ -626,11 +809,11 @@ async function copyJson() {
 
     try {
         await navigator.clipboard.writeText(JSON.stringify(currentData, null, 2));
-        showToast('Respons JSON berhasil disalin!');
+        showToast(translations[currentLang]['toast-copied-json']);
     } catch (err) {
         jsonPre.select();
         document.execCommand('copy');
-        showToast('Respons JSON berhasil disalin!');
+        showToast(translations[currentLang]['toast-copied-json']);
     }
 }
 
@@ -639,7 +822,7 @@ async function copyJson() {
  */
 function exportLinksToTxt() {
     if (!currentData || !currentData.all_files || currentData.all_files.length === 0) {
-        showToast('Tidak ada file untuk diekspor');
+        showToast(translations[currentLang]['toast-no-files']);
         return;
     }
 
@@ -655,7 +838,7 @@ function exportLinksToTxt() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     
-    showToast('Berhasil mengekspor daftar link ke TXT!');
+    showToast(translations[currentLang]['toast-export-success']);
 }
 
 /**
@@ -684,6 +867,12 @@ copyJsonBtn.addEventListener('click', copyJson);
 retryBtn.addEventListener('click', extractLinks);
 exportTxtBtn.addEventListener('click', exportLinksToTxt);
 
+document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        setLanguage(btn.dataset.lang);
+    });
+});
+
 filesToggle.addEventListener('click', () => {
     toggleSection(filesToggle, filesListContainer);
 });
@@ -707,7 +896,7 @@ document.addEventListener('keydown', (e) => {
 
 // Check for query parameter on page load
 window.addEventListener('DOMContentLoaded', () => {
-    loadHistory();
+    setLanguage(currentLang);
 
     const urlParams = new URLSearchParams(window.location.search);
     const queryUrl = urlParams.get('query');

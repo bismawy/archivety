@@ -1,6 +1,6 @@
-# 🗂️ Archive Extractor
+# 🗂️ Archievty
 
-**Archive Extractor** (Archivety) adalah aplikasi web berbasis klien (client-side) yang dirancang untuk membantu Anda mengekstrak tautan unduhan langsung (direct download link), informasi metadata, hash keamanan (MD5, SHA1, CRC32), serta melakukan ekspor tautan massal dari item di **Archive.org** secara instan dan tanpa perlu login.
+**Archievty** adalah aplikasi web berbasis klien (client-side) yang dirancang untuk membantu Anda mengekstrak tautan unduhan langsung (direct download link), informasi metadata, hash keamanan (MD5, SHA1, CRC32), serta melakukan ekspor tautan massal dari item di **Archive.org** secara instan dan tanpa perlu login.
 
 Aplikasi ini dibangun menggunakan teknologi web standar dengan sistem desain modern yang terinspirasi oleh **Shadcn UI**, lengkap dengan animasi mikro dan transisi tema yang dinamis.
 
