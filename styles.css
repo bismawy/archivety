@@ -194,6 +194,7 @@ body {
     font-weight: 700;
     color: hsl(var(--foreground));
     letter-spacing: -0.025em;
+    text-decoration: none;
 }
 
 .logo svg {
@@ -280,6 +281,7 @@ body {
     padding: 1.5rem;
     height: 100%;
     overflow-y: auto;
+    min-width: 0;
 }
 
 /* ============================================
@@ -295,7 +297,6 @@ body {
 }
 
 .card:hover {
-    border-color: hsla(var(--primary), 0.4);
     box-shadow: var(--shadow-md);
 }
 
