@@ -1,0 +1,10 @@
+# PHP files (hanya untuk lokal)
+/api/
+view.php
+
+# Node
+node_modules/
+
+# System files
+.DS_Store
+Thumbs.db
