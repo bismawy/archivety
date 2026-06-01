@@ -34,17 +34,117 @@ const hashesGrid = document.getElementById('hashesGrid');
 const filesSection = document.getElementById('filesSection');
 const filesToggle = document.getElementById('filesToggle');
 const filesCount = document.getElementById('filesCount');
+const filesListContainer = document.getElementById('filesListContainer');
 const filesList = document.getElementById('filesList');
+const exportTxtBtn = document.getElementById('exportTxtBtn');
 const jsonToggle = document.getElementById('jsonToggle');
 const jsonContent = document.getElementById('jsonContent');
 const jsonPre = document.getElementById('jsonPre');
 const copyJsonBtn = document.getElementById('copyJsonBtn');
+const historyCard = document.getElementById('historyCard');
+const historyList = document.getElementById('historyList');
 
 // State
 let currentData = null;
 
 // Theme Toggle
 const themeToggle = document.getElementById('themeToggle');
+
+/**
+ * Shows a toast notification at the top right of the page
+ */
+function showToast(message) {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = `
+        <svg class="toast-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 16 12 12 8 12"></polyline>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        <span class="toast-message">${message}</span>
+    `;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('hide');
+        setTimeout(() => toast.remove(), 200);
+    }, 3000);
+}
+
+/**
+ * Loads recent searches from localStorage
+ */
+function loadHistory() {
+    const history = JSON.parse(localStorage.getItem('extractHistory') || '[]');
+    if (history.length === 0) {
+        historyCard.classList.add('hidden');
+        return;
+    }
+
+    historyCard.classList.remove('hidden');
+    historyList.innerHTML = history.map(item => `
+        <div class="history-item" data-id="${item.itemId}">
+            <div class="history-item-info">
+                <span class="history-item-title">${item.title}</span>
+                <span class="history-item-id">${item.itemId}</span>
+            </div>
+            <button type="button" class="btn-delete-history" data-id="${item.itemId}" title="Hapus Riwayat">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+            </button>
+        </div>
+    `).join('');
+
+    // Add click handlers for items
+    document.querySelectorAll('.history-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            if (e.target.closest('.btn-delete-history')) return;
+            const itemId = item.dataset.id;
+            urlInput.value = `https://archive.org/details/${itemId}`;
+            extractLinks();
+        });
+    });
+
+    // Add click handlers for delete buttons
+    document.querySelectorAll('.btn-delete-history').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const itemId = btn.dataset.id;
+            deleteHistoryItem(itemId);
+        });
+    });
+}
+
+/**
+ * Saves item to history in localStorage
+ */
+function saveToHistory(itemId, title) {
+    let history = JSON.parse(localStorage.getItem('extractHistory') || '[]');
+    history = history.filter(item => item.itemId !== itemId);
+    history.unshift({ itemId, title });
+    if (history.length > 5) {
+        history.pop();
+    }
+    localStorage.setItem('extractHistory', JSON.stringify(history));
+    loadHistory();
+}
+
+/**
+ * Deletes item from history
+ */
+function deleteHistoryItem(itemId) {
+    let history = JSON.parse(localStorage.getItem('extractHistory') || '[]');
+    history = history.filter(item => item.itemId !== itemId);
+    localStorage.setItem('extractHistory', JSON.stringify(history));
+    loadHistory();
+    showToast('Riwayat dihapus');
+}
 
 /**
  * Gets the current theme preference
@@ -216,7 +316,7 @@ function populateResult(data) {
     fileThumbnail.src = data.thumbnail || '';
     fileThumbnail.style.display = 'block';
     fileThumbnail.onerror = () => {
-        fileThumbnail.style.display = 'none';
+        fileThumbnail.src = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="%2340BF95" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`;
     };
     fileTitle.textContent = data.title || data.filename;
     fileType.textContent = data.file_type;
@@ -303,18 +403,26 @@ async function extractLinks() {
     setButtonLoading(true);
     showLoading(inputUrl);
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+
     try {
         // Extract item ID from URL
         const itemId = extractItemId(inputUrl);
 
         if (!itemId) {
+            clearTimeout(timeoutId);
             showError('URL Archive.org tidak valid');
             setButtonLoading(false);
             return;
         }
 
         // Fetch directly from Archive.org API
-        const response = await fetch(`https://archive.org/metadata/${itemId}`);
+        const response = await fetch(`https://archive.org/metadata/${itemId}`, {
+            signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
 
         if (!response.ok) {
             showError(`Gagal mengambil data (HTTP ${response.status})`);
@@ -340,11 +448,17 @@ async function extractLinks() {
         }
 
         populateResult(data);
+        saveToHistory(itemId, data.title);
         showResult();
 
     } catch (error) {
-        console.error('Error:', error);
-        showError('Terjadi kesalahan. Silakan coba lagi.');
+        clearTimeout(timeoutId);
+        if (error.name === 'AbortError') {
+            showError('Koneksi timeout. Server Archive.org lambat merespons.');
+        } else {
+            console.error('Error:', error);
+            showError('Terjadi kesalahan. Silakan coba lagi.');
+        }
     }
 
     setButtonLoading(false);
@@ -354,7 +468,7 @@ async function extractLinks() {
  * Extract item ID from Archive.org URL
  */
 function extractItemId(url) {
-    const match = url.match(/archive\.org\/(?:details|download)\/([^\/\?\#]+)/i);
+    const match = url.match(/archive\.org\/(?:details|download|embed|stream)\/([^\/\?\#]+)/i);
     if (match) return match[1];
     if (/^[a-zA-Z0-9_\-\.]+$/.test(url)) return url;
     return null;
@@ -491,6 +605,7 @@ async function copyDownloadUrl() {
         await navigator.clipboard.writeText(url);
         copyIcon.classList.add('hidden');
         checkIcon.classList.remove('hidden');
+        showToast('Link download berhasil disalin!');
 
         setTimeout(() => {
             copyIcon.classList.remove('hidden');
@@ -499,6 +614,7 @@ async function copyDownloadUrl() {
     } catch (err) {
         downloadUrl.select();
         document.execCommand('copy');
+        showToast('Link download berhasil disalin!');
     }
 }
 
@@ -510,29 +626,36 @@ async function copyJson() {
 
     try {
         await navigator.clipboard.writeText(JSON.stringify(currentData, null, 2));
-        copyJsonBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-            Tersalin!
-        `;
-        setTimeout(() => {
-            copyJsonBtn.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                </svg>
-                Salin JSON
-            `;
-        }, 2000);
+        showToast('Respons JSON berhasil disalin!');
     } catch (err) {
         jsonPre.select();
         document.execCommand('copy');
+        showToast('Respons JSON berhasil disalin!');
     }
+}
+
+/**
+ * Exports all downloadable links to a .txt file
+ */
+function exportLinksToTxt() {
+    if (!currentData || !currentData.all_files || currentData.all_files.length === 0) {
+        showToast('Tidak ada file untuk diekspor');
+        return;
+    }
+
+    const links = currentData.all_files.map(file => file.download_url).join('\n');
+    const blob = new Blob([links], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `archive_links_${currentData.item_id}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showToast('Berhasil mengekspor daftar link ke TXT!');
 }
 
 /**
@@ -559,9 +682,10 @@ clearBtn.addEventListener('click', clearInput);
 copyDownloadBtn.addEventListener('click', copyDownloadUrl);
 copyJsonBtn.addEventListener('click', copyJson);
 retryBtn.addEventListener('click', extractLinks);
+exportTxtBtn.addEventListener('click', exportLinksToTxt);
 
 filesToggle.addEventListener('click', () => {
-    toggleSection(filesToggle, filesList);
+    toggleSection(filesToggle, filesListContainer);
 });
 
 jsonToggle.addEventListener('click', () => {
@@ -583,6 +707,8 @@ document.addEventListener('keydown', (e) => {
 
 // Check for query parameter on page load
 window.addEventListener('DOMContentLoaded', () => {
+    loadHistory();
+
     const urlParams = new URLSearchParams(window.location.search);
     const queryUrl = urlParams.get('query');
 

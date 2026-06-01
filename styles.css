@@ -1205,3 +1205,257 @@ body {
         width: 100%;
     }
 }
+
+/* ============================================
+   Toast Notification Styling
+   ============================================ */
+.toast-container {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    z-index: 9999;
+    pointer-events: none;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: hsl(var(--card));
+    color: hsl(var(--foreground));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    pointer-events: auto;
+    animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    min-width: 280px;
+    max-width: 380px;
+    backdrop-filter: blur(8px);
+    background: hsla(var(--card), 0.95);
+}
+
+.toast-icon {
+    color: hsl(var(--primary));
+    flex-shrink: 0;
+}
+
+.toast-message {
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+@keyframes toastSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes toastFadeOut {
+    to {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+}
+
+.toast.hide {
+    animation: toastFadeOut 0.2s ease forwards;
+}
+
+/* ============================================
+   Skeleton Loader Styling
+   ============================================ */
+.skeleton {
+    background: hsl(var(--muted));
+    border-radius: var(--radius);
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.08) 20%,
+        rgba(255, 255, 255, 0.15) 60%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    animation: shimmer 1.5s infinite;
+}
+
+[data-theme="dark"] .skeleton::after {
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.03) 20%,
+        rgba(255, 255, 255, 0.08) 60%,
+        rgba(255, 255, 255, 0) 100%
+    );
+}
+
+@keyframes shimmer {
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.skeleton-header {
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+    margin-bottom: 1.25rem;
+    align-items: center;
+}
+
+.skeleton-thumbnail {
+    width: 72px;
+    height: 72px;
+    flex-shrink: 0;
+}
+
+.skeleton-header-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.skeleton-title {
+    height: 1.25rem;
+    width: 75%;
+}
+
+.skeleton-badge {
+    height: 0.875rem;
+    width: 35%;
+}
+
+.skeleton-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.skeleton-line {
+    height: 1rem;
+}
+
+/* ============================================
+   Extraction History Styling
+   ============================================ */
+.history-card {
+    transition: all 0.3s ease;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 220px;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    background: hsl(var(--secondary));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.history-item:hover {
+    border-color: hsla(var(--primary), 0.5);
+    background: hsl(var(--accent));
+}
+
+.history-item-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+    gap: 0.125rem;
+}
+
+.history-item-title {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: hsl(var(--foreground));
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+}
+
+.history-item-id {
+    font-size: 0.6875rem;
+    color: hsl(var(--muted-foreground));
+    font-family: var(--font-mono);
+    text-align: left;
+}
+
+.btn-delete-history {
+    background: transparent;
+    border: none;
+    color: hsl(var(--muted-foreground));
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.btn-delete-history:hover {
+    color: hsl(var(--destructive));
+    background: hsla(var(--destructive), 0.1);
+}
+
+/* ============================================
+   Files List Actions Styling
+   ============================================ */
+.files-list-container {
+    margin-top: 0.875rem;
+}
+
+.files-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 1px dashed hsl(var(--border));
+}
+
+.files-actions-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: hsl(var(--muted-foreground));
+}
+
+.files-list-container .files-list {
+    margin-top: 0;
+}
