@@ -108,10 +108,10 @@ body {
     font-family: var(--font-sans);
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    min-height: 100vh;
+    height: 100vh;
     line-height: 1.6;
     position: relative;
-    overflow-x: hidden;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     transition: background-color 0.3s ease, color 0.3s ease;
@@ -260,7 +260,7 @@ body {
     max-width: 1400px;
     width: 100%;
     margin: 0 auto;
-    min-height: 0;
+    overflow: hidden;
 }
 
 /* Left Column */
@@ -270,9 +270,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
-    height: calc(100vh - 57px - 45px);
-    position: sticky;
-    top: 57px;
+    height: 100%;
     overflow-y: auto;
     transition: border-color 0.3s ease;
 }
@@ -280,8 +278,8 @@ body {
 /* Right Column */
 .right-column {
     padding: 1.5rem;
+    height: 100%;
     overflow-y: auto;
-    min-height: calc(100vh - 57px - 45px);
 }
 
 /* ============================================
@@ -1114,8 +1112,15 @@ body {
    Responsive Design
    ============================================ */
 @media (max-width: 900px) {
+    body {
+        height: auto;
+        overflow: auto;
+    }
+
     .main-layout {
         grid-template-columns: 1fr;
+        height: auto;
+        overflow: visible;
     }
 
     .left-column {
@@ -1124,10 +1129,12 @@ body {
         height: auto;
         border-right: none;
         border-bottom: 1px solid hsl(var(--border));
+        overflow: visible;
     }
 
     .right-column {
-        min-height: auto;
+        height: auto;
+        overflow: visible;
     }
 
     .header-left {
@@ -1458,4 +1465,43 @@ body {
 
 .files-list-container .files-list {
     margin-top: 0;
+}
+
+/* ============================================
+   Header Right & Language Switcher
+   ============================================ */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.lang-selector {
+    display: flex;
+    background: hsl(var(--secondary));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    padding: 2px;
+}
+
+.lang-btn {
+    background: transparent;
+    border: none;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.375rem 0.625rem;
+    border-radius: calc(var(--radius) - 2px);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.lang-btn:hover {
+    color: hsl(var(--foreground));
+}
+
+.lang-btn.active {
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    box-shadow: var(--shadow-sm);
 }
