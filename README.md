@@ -18,17 +18,6 @@ Extract direct download links from Archive.org instantly. Get file URLs, metadat
 - **JavaScript** — ES6+, Fetch API, AbortController, localStorage
 - **Font** — Inter (via BunnyCDN)
 
-## How to Use
-
-### Local
-1. Open `index.html` directly in your browser, or
-2. Use VS Code's **Live Server** extension for development
-
-### Deploy
-- Push to **GitHub Pages** or **Cloudflare Pages** for instant deployment (static files only)
-
 ## License
 
 MIT — Use and modify freely.
-
-Made with ♥ by Bisma.
